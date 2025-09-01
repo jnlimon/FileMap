@@ -1,0 +1,23 @@
+{
+  "appId": "com.filemap.desktop",
+  "productName": "FileMap",
+  "directories": {
+    "output": "../dist"
+  },
+  "files": [
+    "main.js",
+    "fileUtils.js",
+    "preload.js",
+    "research-manager/**/*",
+    "assets/**/*"
+  ],
+  "mac": {
+    "category": "public.app-category.productivity",
+    "target": [
+      {
+        "target": "dir",
+        "arch": ["arm64", "x64"]
+      }
+    ]
+  }
+}
