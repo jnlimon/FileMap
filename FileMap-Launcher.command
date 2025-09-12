@@ -64,18 +64,58 @@ else
     echo "✅ No existing FileMap processes found"
 fi
 
+# Check if this is the first run by looking for a marker file
+FIRST_RUN_MARKER="$SCRIPT_DIR/.first-run-complete"
+REACT_FIRST_RUN_MARKER="$SCRIPT_DIR/../research-manager/.first-run-complete"
+
 # Check if dependencies are already installed
 if [ -d "node_modules" ] && [ -f "node_modules/.package-lock.json" ]; then
-    echo "📦 Dependencies already installed, skipping npm install..."
+    echo "📦 Electron dependencies already installed, skipping npm install..."
 else
-    echo "📦 Installing dependencies..."
+    echo "📦 Installing Electron dependencies..."
     npm install
     if [ $? -ne 0 ]; then
-        echo "❌ Failed to install dependencies. Please check your internet connection and try again."
+        echo "❌ Failed to install Electron dependencies. Please check your internet connection and try again."
         read -p "Press Enter to exit..."
         exit 1
     fi
-    echo "✅ Dependencies installed successfully"
+    echo "✅ Electron dependencies installed successfully"
+fi
+
+# Check and install React dependencies if needed
+if [ ! -f "$REACT_FIRST_RUN_MARKER" ]; then
+    echo "📦 First run detected - installing React dependencies..."
+    cd "$SCRIPT_DIR/research-manager"
+    
+    if [ ! -d "node_modules" ] || [ ! -f "node_modules/.package-lock.json" ]; then
+        echo "📦 Installing React dependencies..."
+        npm install
+        if [ $? -ne 0 ]; then
+            echo "❌ Failed to install React dependencies. Please check your internet connection and try again."
+            read -p "Press Enter to exit..."
+            exit 1
+        fi
+        echo "✅ React dependencies installed successfully"
+    fi
+    
+    # Build the React app
+    echo "🔨 Building React application..."
+    npm run build
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to build React application. Please check the error messages above."
+        read -p "Press Enter to exit..."
+        exit 1
+    fi
+    echo "✅ React application built successfully"
+    
+    # Create first run marker
+    touch "$REACT_FIRST_RUN_MARKER"
+    echo "✅ First run setup completed"
+    
+    # Return to electron directory
+    cd "$SCRIPT_DIR/electron"
+else
+    echo "✅ React dependencies already installed, skipping first run setup..."
 fi
 
 # Ensure React build is available and up-to-date

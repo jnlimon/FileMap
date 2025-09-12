@@ -5,6 +5,7 @@ import { AnimalContextMenu } from './AnimalContextMenu';
 import { EditAnimalModal } from './EditAnimalModal';
 import { AnimalDetailModal } from './AnimalDetailModal';
 import { useApp } from '../context/AppContext';
+import { BeakerIcon, UserIcon } from '@heroicons/react/24/outline';
 
 interface AnimalCardProps {
   animal: Animal;
@@ -117,6 +118,30 @@ export function AnimalCard({
         onContextMenu={handleContextMenu}
         title="Click to view details, right-click for options"
       >
+        {/* Header with type indicator */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <div className={`flex items-center justify-center w-6 h-6 rounded-full ${
+              animal.type === 'animal' 
+                ? 'bg-blue-100 dark:bg-blue-900/30' 
+                : 'bg-green-100 dark:bg-green-900/30'
+            }`}>
+              {animal.type === 'animal' ? (
+                <UserIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              ) : (
+                <BeakerIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+              )}
+            </div>
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+              animal.type === 'animal'
+                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+            }`}>
+              {animal.type === 'animal' ? 'Animal' : 'Sample'}
+            </span>
+          </div>
+        </div>
+
         <div className="space-y-3">
           {/* Display configured properties */}
           {animal.displayProperties && animal.displayProperties.length > 0 ? (
@@ -128,8 +153,6 @@ export function AnimalCard({
                 <div key={prop}>
                   {prop === 'name' ? (
                     <h4 className="font-semibold text-gray-900 dark:text-white">{label}</h4>
-                  ) : prop === 'species' ? (
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{label}</p>
                   ) : prop === 'notes' ? (
                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{label}</p>
                   ) : (
@@ -143,17 +166,19 @@ export function AnimalCard({
             <>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-white">{animal.name}</h4>
-                {getPropertyValue('species') && (
-                  <p className="text-sm text-gray-600 dark:text-gray-300">{getPropertyValue('species')}</p>
-                )}
               </div>
             </>
           )}
           
           {/* Footer with creation date */}
           <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-400 dark:text-gray-500">
-              Created: {formatDate(animal.createdAt)}
+            <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+              <span>Created: {formatDate(animal.createdAt)}</span>
+              <div className="flex items-center space-x-1">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                  {animal.type === 'animal' ? 'Animal' : 'Sample'}
+                </span>
+              </div>
             </div>
           </div>
         </div>

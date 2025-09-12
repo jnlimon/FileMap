@@ -28,7 +28,7 @@ export const DisplayPropertiesModal: React.FC<DisplayPropertiesModalProps> = ({
 
   // Get all available properties for this animal type
   const builtInProperties = animal.type === 'animal' 
-    ? ['name', 'species', 'birthDate', 'age', 'weight', 'sex', 'condition', 'notes']
+    ? ['name', 'birthDate', 'age', 'weight', 'sex', 'condition', 'notes']
     : ['name', 'date', 'typeOfSample', 'notes'];
 
   const customProperties = (project.animalProperties || [])

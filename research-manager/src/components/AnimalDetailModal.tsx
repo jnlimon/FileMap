@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from './Modal';
 import { Animal, Project } from '../types';
+import { UserIcon, BeakerIcon } from '@heroicons/react/24/outline';
 
 interface AnimalDetailModalProps {
   isOpen: boolean;
@@ -25,7 +26,21 @@ export function AnimalDetailModal({ isOpen, onClose, animal, project }: AnimalDe
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`${animal.type === 'animal' ? 'Animal' : 'Sample'} Details`} size="md">
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={
+        <div className="flex items-center space-x-2">
+          {animal.type === 'animal' ? (
+            <UserIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          ) : (
+            <BeakerIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+          )}
+          <span>{animal.type === 'animal' ? 'Animal' : 'Sample'} Details</span>
+        </div>
+      } 
+      size="md"
+    >
       <div className="space-y-6">
         {/* All Properties - matching EditAnimalModal structure */}
         <div>
@@ -41,12 +56,6 @@ export function AnimalDetailModal({ isOpen, onClose, animal, project }: AnimalDe
               <p className="text-gray-900 dark:text-white">{animal.name}</p>
             </div>
             
-            <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3 transition-colors">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {animal.type === 'animal' ? 'Species' : 'Type of Sample'}
-              </label>
-              <p className="text-gray-900 dark:text-white">{animal.species || 'Not specified'}</p>
-            </div>
 
             {/* Other built-in properties */}
             {[

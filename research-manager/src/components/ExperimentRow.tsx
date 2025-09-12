@@ -180,7 +180,13 @@ export function ExperimentRow({ experiment, projectId, project, globalProperties
               </h3>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => setIsEditMode(!isEditMode)}
+                  onClick={() => {
+                    if (!isEditMode) {
+                      setShowEditModal(true);
+                    } else {
+                      setIsEditMode(false);
+                    }
+                  }}
                   className={`text-xs px-2 py-1 rounded border transition-colors duration-200 whitespace-nowrap ${
                     isEditMode
                       ? 'bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700'
@@ -203,12 +209,25 @@ export function ExperimentRow({ experiment, projectId, project, globalProperties
           </div>
 
           {/* Basic Info (Always Visible) */}
-          <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-300">
-            <span className="break-words">{experiment.description}</span>
-            {linkedAnimals.length > 0 && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                Linked to {linkedAnimals.length} animal{linkedAnimals.length !== 1 ? 's' : ''}
-              </span>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-300">
+              <span className="break-words">{experiment.description}</span>
+              {linkedAnimals.length > 0 && (
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Linked to {linkedAnimals.length} animal{linkedAnimals.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            {(experiment.startDate || experiment.endDate) && (
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {experiment.startDate && experiment.endDate ? (
+                  <span>{formatDate(new Date(experiment.startDate))} - {formatDate(new Date(experiment.endDate))}</span>
+                ) : experiment.startDate ? (
+                  <span>Started: {formatDate(new Date(experiment.startDate))}</span>
+                ) : (
+                  <span>Ended: {formatDate(new Date(experiment.endDate!))}</span>
+                )}
+              </div>
             )}
           </div>
 
@@ -304,22 +323,34 @@ export function ExperimentRow({ experiment, projectId, project, globalProperties
                     {linkedAnimals.map((animal) => (
                       <div 
                         key={animal.id} 
-                        className="flex items-center space-x-3 p-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors duration-200"
+                        className={`flex items-center space-x-3 p-2 border rounded-lg cursor-pointer transition-colors duration-200 ${
+                          animal.type === 'animal'
+                            ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50'
+                            : 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 hover:bg-green-100 dark:hover:bg-green-900/50'
+                        }`}
                         onClick={() => handleAnimalClick(animal)}
                         title="Click to view details"
                       >
-                        <IdentificationIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                        <IdentificationIcon className={`h-4 w-4 flex-shrink-0 ${
+                          animal.type === 'animal' 
+                            ? 'text-blue-600 dark:text-blue-400' 
+                            : 'text-green-600 dark:text-green-400'
+                        }`} />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2">
                             <span className="text-sm font-medium text-gray-700 dark:text-gray-300 break-words">
                               {animal.name}
                             </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400 bg-blue-200 dark:bg-blue-800 px-2 py-1 rounded flex-shrink-0">
-                              {animal.type}
+                            <span className={`text-xs text-gray-500 dark:text-gray-400 px-2 py-1 rounded flex-shrink-0 ${
+                              animal.type === 'animal'
+                                ? 'bg-blue-200 dark:bg-blue-800'
+                                : 'bg-green-200 dark:bg-green-800'
+                            }`}>
+                              {animal.type === 'animal' ? 'Animal' : 'Sample'}
                             </span>
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {animal.species || 'Unknown species'}
+                            {animal.type === 'animal' ? 'Animal' : 'Sample'}
                           </div>
                         </div>
                       </div>
@@ -366,7 +397,10 @@ export function ExperimentRow({ experiment, projectId, project, globalProperties
       {/* Edit Modal */}
       <EditExperimentModal
         isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
+        onClose={() => {
+          setShowEditModal(false);
+          setIsEditMode(true); // Switch to inline edit mode after modal closes
+        }}
         onSave={handleSaveEdit}
         initialData={{ 
           name: experiment.name, 
@@ -439,7 +473,7 @@ export function ExperimentRow({ experiment, projectId, project, globalProperties
                       />
                       <div className="flex-1">
                         <div className="font-medium text-gray-900 dark:text-white">{animal.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{animal.type} • {animal.species || 'Unknown species'}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{animal.type === 'animal' ? 'Animal' : 'Sample'}</div>
                       </div>
                     </label>
                   );

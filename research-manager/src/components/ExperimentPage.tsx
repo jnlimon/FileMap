@@ -30,7 +30,7 @@ export function ExperimentPage() {
   const [selectedAnimalIds, setSelectedAnimalIds] = useState<string[]>([]);
   const [newAnimalName, setNewAnimalName] = useState('');
   const [newAnimalType, setNewAnimalType] = useState<'animal' | 'sample'>('animal');
-  const [newAnimalSpecies, setNewAnimalSpecies] = useState('');
+  const [newAnimalSampleType, setNewAnimalSampleType] = useState('');
   const [newAnimalBirthDate, setNewAnimalBirthDate] = useState('');
   const [newAnimalWeight, setNewAnimalWeight] = useState('');
   const [newAnimalSex, setNewAnimalSex] = useState('');
@@ -157,14 +157,18 @@ export function ExperimentPage() {
   const handleAddAnimal = () => {
     if (newAnimalName.trim()) {
       // Create properties based on project-level configuration
-      const builtInProperties = [
+      const builtInProperties = newAnimalType === 'animal' ? [
         { name: 'name', value: newAnimalName.trim(), type: 'text' as const, required: true },
-        { name: 'species', value: newAnimalSpecies.trim() || '', type: 'text' as const, required: true },
         { name: 'birthDate', value: newAnimalBirthDate || '', type: 'date' as const, required: false },
         { name: 'age', value: calculateAge(newAnimalBirthDate), type: 'text' as const, required: false },
         { name: 'weight', value: newAnimalWeight.trim() || '', type: 'text' as const, required: false },
         { name: 'sex', value: newAnimalSex.trim() || '', type: 'select' as const, required: false },
         { name: 'condition', value: newAnimalCondition.trim() || '', type: 'text' as const, required: false },
+        { name: 'notes', value: newAnimalNotes.trim() || '', type: 'textarea' as const, required: false }
+      ] : [
+        { name: 'name', value: newAnimalName.trim(), type: 'text' as const, required: true },
+        { name: 'typeOfSample', value: newAnimalSampleType.trim() || '', type: 'text' as const, required: false },
+        { name: 'date', value: newAnimalDate || '', type: 'date' as const, required: false },
         { name: 'notes', value: newAnimalNotes.trim() || '', type: 'textarea' as const, required: false }
       ];
 
@@ -197,7 +201,6 @@ export function ExperimentPage() {
         id: generateId(),
         type: newAnimalType,
         name: newAnimalName.trim(),
-        species: newAnimalSpecies.trim() || undefined,
         properties: defaultProperties,
         experimentIds: [],
         createdAt: new Date(),
@@ -210,7 +213,7 @@ export function ExperimentPage() {
 
       setNewAnimalName('');
       setNewAnimalType('animal');
-      setNewAnimalSpecies('');
+      setNewAnimalSampleType('');
       setNewAnimalBirthDate('');
       setNewAnimalWeight('');
       setNewAnimalSex('');
@@ -550,20 +553,6 @@ export function ExperimentPage() {
                     />
                   </div>
                   
-                  {newAnimalType === 'animal' && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Species
-                      </label>
-                      <input
-                        type="text"
-                        value={newAnimalSpecies}
-                        onChange={(e) => setNewAnimalSpecies(e.target.value)}
-                        placeholder="Enter species"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
-                      />
-                    </div>
-                  )}
 
                   {newAnimalType === 'animal' && (
                     <>
@@ -618,7 +607,7 @@ export function ExperimentPage() {
                           type="text"
                           value={newAnimalCondition || ''}
                           onChange={(e) => setNewAnimalCondition(e.target.value)}
-                          placeholder="e.g., Healthy, Sick, etc."
+                          placeholder="Enter Condition"
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
                         />
                       </div>
@@ -730,8 +719,8 @@ export function ExperimentPage() {
                         </label>
                         <input
                           type="text"
-                          value={newAnimalSpecies}
-                          onChange={(e) => setNewAnimalSpecies(e.target.value)}
+                          value={newAnimalSampleType}
+                          onChange={(e) => setNewAnimalSampleType(e.target.value)}
                           placeholder="e.g., Blood, Tissue, etc."
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
                         />
@@ -803,7 +792,7 @@ export function ExperimentPage() {
                 <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                   <button
                     onClick={() => setViewMode('card')}
-                    className={`p-2 rounded-md transition-colors ${
+                    className={`px-4 py-2 rounded-md transition-colors flex items-center space-x-2 ${
                       viewMode === 'card'
                         ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -811,10 +800,11 @@ export function ExperimentPage() {
                     title="Card View"
                   >
                     <Squares2X2Icon className="h-5 w-5" />
+                    <span className="text-sm font-medium">Card</span>
                   </button>
                   <button
                     onClick={() => setViewMode('row')}
-                    className={`p-2 rounded-md transition-colors ${
+                    className={`px-4 py-2 rounded-md transition-colors flex items-center space-x-2 ${
                       viewMode === 'row'
                         ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -822,6 +812,7 @@ export function ExperimentPage() {
                     title="Row View"
                   >
                     <ViewColumnsIcon className="h-5 w-5" />
+                    <span className="text-sm font-medium">Row</span>
                   </button>
                 </div>
                 <button
@@ -965,14 +956,14 @@ export function ExperimentPage() {
                 </div>
               )
             ) : (
-              <div className="text-center py-8 bg-white rounded-xl border-2 border-dashed border-gray-300">
-                <div className="text-gray-400 mb-4">
+              <div className="text-center py-8 bg-white dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 transition-colors">
+                <div className="text-gray-400 dark:text-gray-500 mb-4">
                   <IdentificationIcon className="mx-auto h-12 w-12" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                   No animals/samples yet
                 </h3>
-                <p className="text-gray-500">
+                <p className="text-gray-500 dark:text-gray-400">
                   Use the "Add Animal/Sample" button above to get started
                 </p>
               </div>

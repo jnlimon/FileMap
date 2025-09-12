@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Animal, ProjectAnimalProperty } from '../types';
 import { Modal } from './Modal';
 import { useApp } from '../context/AppContext';
+import { UserIcon, BeakerIcon } from '@heroicons/react/24/outline';
 
 interface EditAnimalModalProps {
   isOpen: boolean;
@@ -32,12 +33,10 @@ export function EditAnimalModal({
       
       // Add built-in properties
       initialData['name'] = animal.name;
-      initialData['species'] = animal.species || '';
       
       // Add all configured properties from the project
       const allProperties = [
         { name: 'name', label: 'Animal ID / Sample ID', type: 'text', required: true },
-        { name: 'species', label: 'Species / Type', type: 'text', required: true },
         { name: 'birthDate', label: 'Birth Date', type: 'date', required: false },
         { name: 'age', label: 'Age', type: 'text', required: false },
         { name: 'weight', label: 'Weight', type: 'text', required: false },
@@ -82,7 +81,6 @@ export function EditAnimalModal({
     const existingPropNames = new Set(animal.properties.map(p => p.name));
     const allProperties = [
       { name: 'name', type: 'text' as const, required: true },
-      { name: 'species', type: 'text' as const, required: true },
       { name: 'birthDate', type: 'date' as const, required: false },
       { name: 'age', type: 'text' as const, required: false },
       { name: 'weight', type: 'text' as const, required: false },
@@ -158,7 +156,21 @@ export function EditAnimalModal({
   ];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} size={size}>
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={
+        <div className="flex items-center space-x-2">
+          {animal.type === 'animal' ? (
+            <UserIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          ) : (
+            <BeakerIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+          )}
+          <span>{title}</span>
+        </div>
+      } 
+      size={size}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         {allProperties.map((prop) => (
           <div key={prop.name}>
@@ -207,7 +219,7 @@ export function EditAnimalModal({
           </button>
           <button
             type="submit"
-            disabled={!formData['name']?.trim() || !formData['species']?.trim()}
+            disabled={!formData['name']?.trim()}
             className="btn-primary"
           >
             Save Changes

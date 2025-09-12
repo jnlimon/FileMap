@@ -1,143 +1,153 @@
 # Research Manager Desktop App
 
-A modern, cross-platform desktop application built with Electron and React for managing research projects, papers, and academic resources.
-
-## 🚀 Features
-
-- **Cross-platform**: Works on Windows, macOS, and Linux
-- **Modern UI**: Built with React and Tailwind CSS
-- **File Management**: Organize and categorize research materials
-- **Search & Filter**: Quickly find specific research documents
-- **Responsive Design**: Adapts to different screen sizes
-- **Native Performance**: Built with Electron for optimal desktop experience
-
-## 🛠️ Tech Stack
-
-- **Frontend**: React 18 with TypeScript
-- **Styling**: Tailwind CSS
-- **Desktop Framework**: Electron
-- **Build Tool**: Vite
-- **Package Manager**: npm
-
-## 📋 Prerequisites
-
-Before you begin, ensure you have the following installed:
-- [Node.js](https://nodejs.org/) (version 16 or higher)
-- [npm](https://www.npmjs.com/) (comes with Node.js)
-- Git
+A powerful desktop application for managing research files, built with Electron and React.
 
 ## 🚀 Quick Start
 
-### 1. Clone the Repository
+### Prerequisites
+- **macOS** (tested on macOS 10.15+)
+- **Node.js 18+** ([Download here](https://nodejs.org/) or install via Homebrew: `brew install node@18`)
 
-```bash
-git clone <your-github-repo-url>
-cd "Research Manager Desktop App"
-```
+### Installation & First Run
 
-### 2. Install Dependencies
+1. **Download the source code**
+   ```bash
+   git clone https://github.com/yourusername/research-manager-desktop-app.git
+   cd research-manager-desktop-app
+   ```
 
-```bash
-# Install root dependencies
-npm install
+2. **Run the application**
+   - Double-click `FileMap-Launcher.command` in Finder, or
+   - Run from terminal: `./FileMap-Launcher.command`
 
-# Install React app dependencies
-cd research-manager
-npm install
-cd ..
-```
+3. **First run setup**
+   - The app will automatically detect this is your first run
+   - It will install all required dependencies (this may take a few minutes)
+   - The React frontend will be built automatically
+   - Subsequent runs will be much faster!
 
-### 3. Development Mode
+### What happens on first run?
+- ✅ Installs Electron dependencies
+- ✅ Installs React dependencies  
+- ✅ Builds the React frontend
+- ✅ Creates necessary data directories
+- ✅ Sets up auto-save functionality
 
-```bash
-# Start the React development server
-cd research-manager
-npm start
-
-# In another terminal, start Electron
-cd ..
-npm run electron-dev
-```
-
-### 4. Build for Production
-
-```bash
-# Build the React app
-cd research-manager
-npm run build
-cd ..
-
-# Package the Electron app
-npm run package
-```
+### What happens on subsequent runs?
+- ✅ Skips dependency installation (much faster!)
+- ✅ Checks for React build updates
+- ✅ Launches the application directly
 
 ## 📁 Project Structure
 
 ```
-Research Manager Desktop App/
-├── electron/                 # Electron main process files
-│   ├── main.js              # Main Electron process
-│   ├── preload.js           # Preload script for security
-│   ├── package.json         # Electron dependencies
-│   └── research-manager/    # Built React app
-├── research-manager/         # React application source
-│   ├── src/                 # React components and logic
-│   ├── public/              # Static assets
-│   ├── package.json         # React dependencies
-│   └── tailwind.config.js   # Tailwind CSS configuration
-├── assets/                   # App icons and assets
-├── dist/                     # Build outputs (gitignored)
-└── package.json              # Root package.json
+research-manager-desktop-app/
+├── FileMap-Launcher.command    # Main launcher script
+├── electron/                   # Electron main process
+│   ├── main.js                # Main Electron process
+│   ├── preload.js             # Preload script
+│   ├── fileUtils.js           # File utilities
+│   └── package.json           # Electron dependencies
+├── research-manager/           # React frontend
+│   ├── src/                   # React source code
+│   ├── public/                # Static assets
+│   └── package.json           # React dependencies
+└── README.md                  # This file
 ```
 
-## 🔧 Available Scripts
+## 🔧 Development
 
-### Root Level
-- `npm install` - Install all dependencies
-- `npm run electron-dev` - Start Electron in development mode
-- `npm run package` - Build and package the application
+### Prerequisites for Development
+- Node.js 18+
+- npm
 
-### React App (research-manager/)
-- `npm start` - Start development server
-- `npm run build` - Build for production
-- `npm test` - Run tests
-- `npm run eject` - Eject from Create React App
+### Running in Development Mode
+```bash
+# Install dependencies
+cd electron && npm install
+cd ../research-manager && npm install
 
-## 📦 Building and Distribution
+# Run React development server
+cd research-manager && npm start
 
-The app includes several packaging scripts for different deployment scenarios:
+# In another terminal, run Electron
+cd electron && npm run dev
+```
 
-- `package-app.sh` - Basic packaging
-- `package-app-simple.sh` - Minimal packaging
-- `package-app-complete.sh` - Comprehensive packaging
-- `package-app-final.sh` - Production-ready packaging
+### Building for Production
+```bash
+# Build React app
+cd research-manager && npm run build
+
+# Package Electron app
+cd electron && npm run dist
+```
+
+## 📊 Features
+
+- **File Management**: Organize and categorize research files
+- **Auto-save**: Automatic saving every 10 seconds + on app close
+- **Cross-platform**: Built with Electron for desktop compatibility
+- **Modern UI**: React-based interface with Tailwind CSS
+- **Data Persistence**: Local data storage with automatic backup
+
+## 🗂️ Data Storage
+
+Your data is automatically saved to:
+```
+~/Library/Application Support/FileMap/research-manager-data.json
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**"Node.js not found" error**
+- Install Node.js 18+ from [nodejs.org](https://nodejs.org/)
+- Or via Homebrew: `brew install node@18`
+
+**"npm not found" error**
+- Node.js installation includes npm
+- Reinstall Node.js if npm is missing
+
+**App won't start after first run**
+- Check if you have the required Node.js version
+- Try deleting the `.first-run-complete` files and running again
+- Check the terminal output for specific error messages
+
+**Dependencies installation fails**
+- Check your internet connection
+- Try running `npm install` manually in both `electron/` and `research-manager/` directories
+
+### Reset to First Run
+If you need to reset the app to first-run state:
+```bash
+rm .first-run-complete
+rm research-manager/.first-run-complete
+rm -rf electron/node_modules
+rm -rf research-manager/node_modules
+rm -rf research-manager/build
+```
+
+## 📝 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-## 📝 License
+## 📞 Support
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-If you encounter any issues or have questions:
-
-1. Check the [Issues](https://github.com/yourusername/your-repo-name/issues) page
-2. Create a new issue with detailed information
-3. Include your operating system and Node.js version
-
-## 🔄 Version History
-
-- **v1.0.0** - Initial release with basic research management features
-- **v1.1.0** - Added advanced search and filtering capabilities
-- **v1.2.0** - Improved UI/UX and performance optimizations
+If you encounter any issues:
+1. Check the troubleshooting section above
+2. Search existing issues on GitHub
+3. Create a new issue with detailed information about your problem
 
 ---
 
-**Note**: This is a desktop application. Make sure to build and package it for your target platform before distribution.
+**Note**: This app is designed to work offline after the initial setup. All dependencies are installed locally and no internet connection is required for normal operation.
