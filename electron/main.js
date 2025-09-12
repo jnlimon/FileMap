@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, ipcMain } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
 const fileUtils = require('./fileUtils');
 const fs = require('fs');
@@ -313,6 +313,11 @@ app.whenReady().then(() => {
   initializeStorage(); // Initialize file-based storage
   setupIpcHandlers();
   createWindow();
+  
+  // Register Cmd+Q shortcut for proper quit
+  globalShortcut.register('CommandOrControl+Q', () => {
+    app.quit();
+  });
 });
 
 // Quit when all windows are closed
@@ -331,21 +336,42 @@ app.on('before-quit', (event) => {
     // Set shutdown flag to prevent console logging
     isShuttingDown = true;
     
-    // Prevent immediate quit to allow save to complete
-    event.preventDefault();
-    
-    // Force save and then quit
-    forceSaveBeforeQuit();
-    
-    // Wait for save to complete, then quit
-    setTimeout(() => {
+    // Only prevent quit if we need to save data
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      // Prevent immediate quit to allow save to complete
+      event.preventDefault();
+      
+      // Force save and then quit
+      forceSaveBeforeQuit();
+      
+      // Wait for save to complete, then quit
+      setTimeout(() => {
+        cleanup();
+        app.quit();
+      }, 1000); // Reduced timeout for faster quit
+    } else {
+      // No window to save, just cleanup and quit
       cleanup();
-      app.quit();
-    }, 2500);
+    }
   } catch (e) {
     // If cleanup fails, still quit
     app.quit();
   }
+});
+
+// Handle force quit (Cmd+Q or right-click quit)
+app.on('will-quit', (event) => {
+  // Set shutdown flag
+  isShuttingDown = true;
+  
+  // Unregister global shortcuts
+  globalShortcut.unregisterAll();
+  
+  // Clean up resources
+  cleanup();
+  
+  // Allow the quit to proceed
+  // Don't call event.preventDefault() here
 });
 
 app.on('activate', () => {
