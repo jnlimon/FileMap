@@ -3,15 +3,23 @@ const path = require('path');
 const fileUtils = require('./fileUtils');
 const fs = require('fs');
 
+// Safe logging function that prevents EIO errors during shutdown
+let isShuttingDown = false;
+function safeLog(...args) {
+  if (!isShuttingDown) {
+    try {
+      console.log(...args);
+    } catch (e) {
+      // Silently handle console errors during shutdown
+    }
+  }
+}
+
 // Prevent multiple instances
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
-  try {
-    console.log('🚫 Another instance is already running, quitting...');
-  } catch (e) {
-    // Silently handle console errors
-  }
+  safeLog('🚫 Another instance is already running, quitting...');
   app.quit();
   return;
 }
@@ -23,35 +31,19 @@ let lastSavedData = null;
 
 // Define storage functions at module level
 function loadData() {
-  try {
-    console.log('🔍 loadData() called with dataFilePath:', dataFilePath);
-  } catch (e) {
-    // Silently handle console errors
-  }
+  safeLog('🔍 loadData() called with dataFilePath:', dataFilePath);
   
   try {
     if (fs.existsSync(dataFilePath)) {
       const data = fs.readFileSync(dataFilePath, 'utf8');
-      try {
-        console.log('📥 Loaded data from file:', dataFilePath);
-        console.log('📦 File contents:', data);
-      } catch (e) {
-        // Silently handle console errors
-      }
+      safeLog('📥 Loaded data from file:', dataFilePath);
+      safeLog('📦 File contents:', data);
       return JSON.parse(data);
     } else {
-      try {
-        console.log('❌ File does not exist:', dataFilePath);
-      } catch (e) {
-        // Silently handle console errors
-      }
+      safeLog('❌ File does not exist:', dataFilePath);
     }
   } catch (error) {
-    try {
-      console.error('❌ Error loading data:', error);
-    } catch (e) {
-      // Silently handle console errors
-    }
+    safeLog('❌ Error loading data:', error);
   }
   
   // Return default data if file doesn't exist or error
@@ -62,64 +54,36 @@ function loadData() {
     filters: { query: '', tags: [] }
   };
   
-  try {
-    console.log('🆕 Using default data:', defaultData);
-  } catch (e) {
-    // Silently handle console errors
-  }
+  safeLog('🆕 Using default data:', defaultData);
   return defaultData;
 }
 
 function saveData(data) {
-  try {
-    console.log('💾 saveData() called with dataFilePath:', dataFilePath);
-    console.log('💾 Data to save:', JSON.stringify(data, null, 2));
-  } catch (e) {
-    // Silently handle console errors
-  }
+  safeLog('💾 saveData() called with dataFilePath:', dataFilePath);
+  safeLog('💾 Data to save:', JSON.stringify(data, null, 2));
   
   try {
     const dataDir = path.dirname(dataFilePath);
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
-      try {
-        console.log('📁 Created directory:', dataDir);
-      } catch (e) {
-        // Silently handle console errors
-      }
+      safeLog('📁 Created directory:', dataDir);
     }
     
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
-    try {
-      console.log('💾 Data saved to file:', dataFilePath);
-    } catch (e) {
-      // Silently handle console errors
-    }
+    safeLog('💾 Data saved to file:', dataFilePath);
     
     // Verify the file was created
     if (fs.existsSync(dataFilePath)) {
-      try {
-        console.log('✅ File exists after saving');
-        const savedData = fs.readFileSync(dataFilePath, 'utf8');
-        console.log('✅ File contents after saving:', savedData);
-      } catch (e) {
-        // Silently handle console errors
-      }
+      safeLog('✅ File exists after saving');
+      const savedData = fs.readFileSync(dataFilePath, 'utf8');
+      safeLog('✅ File contents after saving:', savedData);
     } else {
-      try {
-        console.log('❌ File does not exist after saving!');
-      } catch (e) {
-        // Silently handle console errors
-      }
+      safeLog('❌ File does not exist after saving!');
     }
     
     return true;
   } catch (error) {
-    try {
-      console.error('❌ Error saving data:', error);
-    } catch (e) {
-      // Silently handle console errors
-    }
+    safeLog('❌ Error saving data:', error);
     return false;
   }
 }
@@ -129,17 +93,9 @@ function initializeStorage() {
   dataFilePath = path.join(app.getPath('userData'), 'research-manager-data.json');
   
   // Log the data file path for debugging
-  try {
-    console.log('📁 Data file path:', dataFilePath);
-  } catch (e) {
-    // Silently handle console errors
-  }
+  safeLog('📁 Data file path:', dataFilePath);
   const initialData = loadData();
-  try {
-    console.log('📦 Initial data contents:', initialData);
-  } catch (e) {
-    // Silently handle console errors
-  }
+  safeLog('📦 Initial data contents:', initialData);
   lastSavedData = JSON.stringify(initialData);
   
   // Set up auto-save every 10 seconds
@@ -150,11 +106,7 @@ function initializeStorage() {
     }
   }, 10000); // 10 seconds
   
-  try {
-    console.log('⏰ Auto-save enabled (every 10 seconds)');
-  } catch (e) {
-    // Silently handle console errors
-  }
+  safeLog('⏰ Auto-save enabled (every 10 seconds)');
 }
 
 // Keep a global reference of the window object
@@ -182,21 +134,8 @@ function createWindow() {
   });
 
   // Simple approach: Load directly from the build directory
-  try {
-    console.log('🚀 Loading React app directly from build directory...');
-  } catch (e) {
-    // Silently handle console errors
-  }
-  
   const buildPath = path.join(__dirname, 'research-manager');
   const indexPath = path.join(buildPath, 'index.html');
-  
-  try {
-    console.log('📁 Build path:', buildPath);
-    console.log('📄 Index file:', indexPath);
-  } catch (e) {
-    // Silently handle console errors
-  }
   
   // Load the app directly from the file system
   mainWindow.loadFile(indexPath);
@@ -251,32 +190,20 @@ function setupIpcHandlers() {
 
   // Data persistence - Load data from file
   ipcMain.handle('load-data', async () => {
-    try {
-      console.log('📥 Loading data from file system...');
-    } catch (e) {
-      // Silently handle console errors
-    }
+    safeLog('📥 Loading data from file system...');
     return loadData();
   });
 
   // Data persistence - Save data to file
   ipcMain.handle('save-data', async (event, data) => {
-    try {
-      console.log('💾 Saving data to file system:', data);
-    } catch (e) {
-      // Silently handle console errors
-    }
+    safeLog('💾 Saving data to file system:', data);
     return saveData(data);
   });
 
   // Handle manual save request
   ipcMain.handle('manual-save', async (event, data) => {
     try {
-      try {
-        console.log('💾 Manual save requested...');
-      } catch (e) {
-        // Silently handle console errors
-      }
+      safeLog('💾 Manual save requested...');
       return saveData(data);
     } catch (e) {
       // Silently handle manual save errors
@@ -312,19 +239,11 @@ function autoSave(data) {
   try {
     const currentDataString = JSON.stringify(data);
     if (currentDataString !== lastSavedData) {
-      try {
-        console.log('🔄 Auto-saving data (data has changed)...');
-      } catch (e) {
-        // Silently handle console errors
-      }
+      safeLog('🔄 Auto-saving data (data has changed)...');
       saveData(data);
       lastSavedData = currentDataString;
     } else {
-      try {
-        console.log('⏭️  Skipping auto-save (no changes detected)');
-      } catch (e) {
-        // Silently handle console errors
-      }
+      safeLog('⏭️  Skipping auto-save (no changes detected)');
     }
   } catch (e) {
     // Silently handle auto-save errors
@@ -386,11 +305,7 @@ function forceSaveBeforeQuit() {
 
 // This method will be called when Electron has finished initialization
 app.whenReady().then(() => {
-  try {
-    console.log('🚀 FileMap app is ready, setting up...');
-  } catch (e) {
-    // Silently handle console errors
-  }
+  safeLog('🚀 FileMap app is ready, setting up...');
   
   // Set app name for macOS dock and menu bar
   app.setName('FileMap');
@@ -413,6 +328,9 @@ app.on('window-all-closed', () => {
 // Handle app quit with enhanced save
 app.on('before-quit', (event) => {
   try {
+    // Set shutdown flag to prevent console logging
+    isShuttingDown = true;
+    
     // Prevent immediate quit to allow save to complete
     event.preventDefault();
     
