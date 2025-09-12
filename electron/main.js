@@ -296,18 +296,8 @@ function setupIpcHandlers() {
   // Handle force save request (for app close)
   ipcMain.on('force-save-data', (event, data) => {
     try {
-      try {
-        console.log('🚨 Force save requested during app close...');
-      } catch (e) {
-        // Silently handle console errors
-      }
       if (data) {
         saveData(data);
-        try {
-          console.log('✅ Force save completed');
-        } catch (e) {
-          // Silently handle console errors during cleanup
-        }
       }
     } catch (e) {
       // Silently handle any errors during force save
@@ -347,11 +337,6 @@ function cleanup() {
     // Clear auto-save interval
     if (autoSaveInterval) {
       clearInterval(autoSaveInterval);
-      try {
-        console.log('⏰ Auto-save interval cleared');
-      } catch (e) {
-        // Silently handle console errors during cleanup
-      }
     }
     
     // Force save any pending data immediately
@@ -361,11 +346,7 @@ function cleanup() {
         
         // Give a moment for the save to complete
         setTimeout(() => {
-          try {
-            console.log('✅ Cleanup completed');
-          } catch (e) {
-            // Silently handle console errors during cleanup
-          }
+          // Cleanup completed - no console logging during shutdown
         }, 1500);
       } catch (e) {
         // Silently handle errors during cleanup
@@ -382,11 +363,6 @@ function forceSaveBeforeQuit() {
     // Clear auto-save interval
     if (autoSaveInterval) {
       clearInterval(autoSaveInterval);
-      try {
-        console.log('⏰ Auto-save interval cleared');
-      } catch (e) {
-        // Silently handle console errors during cleanup
-      }
     }
     
     // Try to save immediately if we have a window
@@ -397,11 +373,7 @@ function forceSaveBeforeQuit() {
         
         // Wait a bit longer for the save to complete
         setTimeout(() => {
-          try {
-            console.log('✅ Force save completed');
-          } catch (e) {
-            // Silently handle console errors during cleanup
-          }
+          // Force save completed - no console logging during shutdown
         }, 2000);
       } catch (e) {
         // Silently handle errors during cleanup
@@ -441,12 +413,6 @@ app.on('window-all-closed', () => {
 // Handle app quit with enhanced save
 app.on('before-quit', (event) => {
   try {
-    try {
-      console.log('🔄 App is quitting, performing enhanced cleanup...');
-    } catch (e) {
-      // Silently handle console errors during quit
-    }
-    
     // Prevent immediate quit to allow save to complete
     event.preventDefault();
     
